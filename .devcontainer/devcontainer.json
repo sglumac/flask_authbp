@@ -1,0 +1,11 @@
+{
+	"name": "Python 3",
+	"build": {
+		"dockerfile": "./Dockerfile",
+		"context": ".."
+	},
+	"extensions": [
+		"littlefoxteam.vscode-python-test-adapter"
+	],
+	"onCreateCommand": "pip install -e ."
+}
