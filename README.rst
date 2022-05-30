@@ -6,7 +6,7 @@ Flask Auth Blueprint
 .. image:: https://img.shields.io/pypi/v/flask_authbp.svg
         :target: https://pypi.python.org/pypi/flask_authbp
 
-.. image:: https://circleci.com/gh/sglumac/flask_authbp/tree/main.svg?style=svg
+.. image:: https://circleci.com/gh/sglumac/flask_authbp/tree/main.svg?style=shield
         :target: https://circleci.com/gh/sglumac/flask_authbp/tree/main
 
 .. image:: https://readthedocs.org/projects/flask-authbp/badge/?version=latest
