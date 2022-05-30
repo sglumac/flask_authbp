@@ -13,6 +13,8 @@ Flask Auth Blueprint
         :target: https://flask-authbp.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
+.. image:: https://codecov.io/gh/sglumac/flask_authbp/branch/main/graph/badge.svg?token=LPH4IL6J5M
+        :target: https://codecov.io/gh/sglumac/flask_authbp
 
 
 
