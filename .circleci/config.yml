@@ -11,7 +11,7 @@ jobs:
     steps:
       - checkout
       - run:
-          command: python -m pip -r requirements_dev.txt
+          command: python -m pip install -r requirements_dev.txt
       - run:
           name: Run tests
           command: |
