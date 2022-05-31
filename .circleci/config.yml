@@ -16,8 +16,8 @@ jobs:
       - run:
           name: Run tests
           command: |
-            coverage run -m unittest discover
-            coverage xml
+            pipenv run coverage run -m unittest discover
+            pipenv run coverage xml
       - codecov/upload
   publish:
     docker:
