@@ -32,6 +32,12 @@ jobs:
             python -m pip install pipenv
             python -m pipenv install twine
       - run:
+          name: Init .pypirc
+          command: |
+            echo -e "[pypi]" >> ~/.pypirc
+            echo -e "username = $PYPI_USERNAME" >> ~/.pypirc
+            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+      - run:
           name: Upload to PyPI
           command: |
             python -m pipenv run twine upload dist/*
