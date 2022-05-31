@@ -1,7 +1,6 @@
 version: 2.1
 
 orbs:
-  python: circleci/python@2.0.3
   codecov: codecov/codecov@3.2.2
 
 jobs:
@@ -11,6 +10,7 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install requirements_dev.txt
           command: python -m pip install -r requirements_dev.txt
       - run:
           name: Run tests
@@ -24,11 +24,14 @@ jobs:
     steps:
       - checkout
       - run:
-          command: |
-            python setup.py sdist bdist_wheel
-            sudo pip install pipenv
-            pipenv install twine
-            pipenv run twine upload dist/*
+          name: Build package
+          command: python setup.py sdist bdist_wheel
+      - run:
+          name: Install twine
+          command: python -m pip install twine
+      - run:
+          name: Upload to PyPI
+          command: python -m twine upload dist/*
 
 workflows:
   test_publish:
