@@ -11,7 +11,7 @@ jobs:
     steps:
       - checkout
       - python/install-packages:
-          pkg-manager: pip
+          pkg-manager: python -m pip
           pip-dependency-file: requirements_dev.txt
       - run:
           name: Run tests
