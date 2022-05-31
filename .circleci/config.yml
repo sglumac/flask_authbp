@@ -12,6 +12,7 @@ jobs:
       - checkout
       - python/install-packages:
           pkg-manager: pip
+          args: --upgrade pip
       - python/install-packages:
           pkg-manager: pip
           pip-dependency-file: requirements_dev.txt
