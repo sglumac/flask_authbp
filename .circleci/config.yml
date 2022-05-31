@@ -29,12 +29,12 @@ jobs:
       - run:
           name: Install twine
           command: |
-            sudo pip install pipenv
-            pipenv install twine
+            python -m pip install pipenv
+            python -m pipenv install twine
       - run:
           name: Upload to PyPI
           command: |
-            pipenv run twine upload dist/*
+            python -m pipenv run twine upload dist/*
 
 workflows:
   test_publish:
