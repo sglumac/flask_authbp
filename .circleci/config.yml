@@ -10,9 +10,8 @@ jobs:
       - image: cimg/python:3.10.4
     steps:
       - checkout
-      - python/install-packages:
-          pkg-manager: python -m pip
-          pip-dependency-file: requirements_dev.txt
+      - run:
+          command: python -m pip -r requirements_dev.txt
       - run:
           name: Run tests
           command: |
