@@ -41,6 +41,8 @@ workflows:
     jobs:
       - test
       - publish:
+          context:
+            - PYPI
           requires:
             - test
           filters:
