@@ -10,3 +10,4 @@ twine==1.14.0
 Flask==2.1.2
 flask-restx==0.5.1
 PyJWT==2.3.0
+mypy==0.960

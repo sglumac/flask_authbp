@@ -4,6 +4,7 @@
 
 
 from flask import Config, Flask
+from flask_restx import Api, Resource
 
 import unittest
 import time
@@ -11,36 +12,57 @@ import time
 import flask_authbp
 
 
-def create_testing_app():
+class TestStorage(flask_authbp.Storage):
+    def __init__(self):
+        self._passwordHashes = dict()
+        self._refreshTokens = dict()
+
+    def find_password_hash(self, username):
+        return self._passwordHashes[username] if username in self._passwordHashes else None
+
+    def store_refresh_token(self, username, refreshToken, userAgentHash):
+        self._refreshTokens[userAgentHash] = refreshToken
+
+    def store_user(self, username, password):
+        self._passwordHashes[username] = password
+
+    def find_refresh_token(self, userAgentHash):
+        return self._refreshTokens[userAgentHash] if userAgentHash in self._refreshTokens else None
+
+    def update_refresh_token(self, userAgentHash, refreshToken):
+        self._refreshTokens[userAgentHash] = refreshToken
+
+
+def create_testing_app(title, accessExpSecs=15 * 60):
     class TestingConfig(Config):
         DATABASE_URI = 'sqlite:///:memory:'
         TESTING = True
         SECRET_KEY = 'my secret'
-        ACCESS_EXP_SECS = 15 * 60
+        ACCESS_EXP_SECS = accessExpSecs
         REFRESH_EXP_SECS = 30 * 24 * 60 * 60
 
-    app = Flask('testing_app')
+    storage = TestStorage()
+    blueprint, authorization_required = flask_authbp.create_blueprint(storage)
+    app = Flask(title)
     app.config.from_object(TestingConfig)
-    app.register_blueprint(flask_authbp.blueprint)
-    return app
+    app.register_blueprint(blueprint)
+    api = Api(app)
 
+    @api.route('/testing/resource')
+    class TestingResource(Resource):
+        @authorization_required
+        def post(self, user):
+            return 200
 
-def create_short_access_testing_app():
-    class ShortAccessExpTestConfig(Config):
-        DATABASE_URI = 'sqlite:///:memory:'
-        TESTING = True
-        SECRET_KEY = 'my secret'
-        ACCESS_EXP_SECS = 1
-        REFRESH_EXP_SECS = 30 * 24 * 60 * 60
-    app = Flask('short_access_testing_app')
-    app.config.from_object(ShortAccessExpTestConfig)
-    app.register_blueprint(flask_authbp.blueprint)
+        def get(self):
+            return 'Mislav'
+
     return app
 
 
 class TestAuth(unittest.TestCase):
     def setUp(self):
-        app = create_testing_app()
+        app = create_testing_app('testing_app')
         self._testClient = app.test_client()
 
     def test_register_invalid_pass(self):
@@ -50,7 +72,9 @@ class TestAuth(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json['message'], 'Password should have 6-64 symbols, required upper and lower case letters. Can contain !@#$%_')
+            response.json['message'],
+            'Password should have 6-64 symbols, required upper and lower case letters. Can contain !@#$%_'
+        )
 
     def test_register_invalid_user(self):
         response = self._testClient.post('/register', json={
@@ -59,7 +83,10 @@ class TestAuth(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json['message'], 'Username should have 4-16 symbols, can contain A-Z, a-z, 0-9, _ (_ can not be at the begin/end and can not go in a row (__))')
+            response.json['message'],
+            'Username should have 4-16 symbols, can contain A-Z, a-z, 0-9, _ ' +
+            '(_ can not be at the begin/end and can not go in a row (__))'
+        )
 
     def test_register_success(self):
         response = self._testClient.post('/register', json={
@@ -106,19 +133,17 @@ class TestAuth(unittest.TestCase):
                          'Incorrect username or password')
 
     def test_login_success(self):
-        response = self._testClient.post('/register', json={
+        testUser = {
             'username': 'CorrectPassUser',
             'password': 'CorrectPassUser1234!'
-        })
+        }
+        response = self._testClient.post('/register', json=testUser)
         self.assertEqual(response.status_code, 200)
-        response = self._testClient.post('/login', json={
-            'username': 'CorrectPassUser',
-            'password': 'CorrectPassUser1234!'
-        })
+        response = self._testClient.post('/login', json=testUser)
         self.assertEqual(response.status_code, 200)
 
     def test_rejected_authorization(self):
-        response = self._testClient.post('/bookAd')
+        response = self._testClient.post('/testing/resource')
         self.assertEqual(response.status_code, 403)
 
     def test_accepted_authorization(self):
@@ -131,17 +156,15 @@ class TestAuth(unittest.TestCase):
         loginResponse = self._testClient.post('/login', json=testUser)
         self.assertEqual(loginResponse.status_code, 200)
         accessToken = loginResponse.json['access_token']
-        bookAd = {
-            'title': 'Steppenwolf',
-            'imageFile': 'book.jpg'
-        }
+        testData = {'data': 'test'}
         authorization = {'Authorization': f'access_token {accessToken}'}
-        bookAdResponse = self._testClient.post(
-            '/bookAd', json=bookAd, headers=authorization)
-        self.assertEqual(bookAdResponse.status_code, 200)
+        testingResponse = self._testClient.post(
+            '/testing/resource', json=testData, headers=authorization)
+        self.assertEqual(testingResponse.status_code, 200)
 
     def test_expired_access_token(self):
-        app = create_short_access_testing_app()
+        shortAccessExpSecs = 1
+        app = create_testing_app('short_access', accessExpSecs=shortAccessExpSecs)
         self._testClient = app.test_client()
         testClient = app.test_client()
         testUser = {
@@ -153,14 +176,9 @@ class TestAuth(unittest.TestCase):
         loginResponse = testClient.post('/login', json=testUser)
         self.assertEqual(loginResponse.status_code, 200)
         accessToken = loginResponse.json['access_token']
-        time.sleep(2)  # 1 second
-        bookAd = {
-            'title': 'Steppenwolf',
-            'imageFile': 'book.jpg'
-        }
+        time.sleep(shortAccessExpSecs + 1)
+        testData = {'data': 'test'}
         authorization = {'Authorization': f'access_token {accessToken}'}
-        bookAdResponse = testClient.post(
-            '/bookAd', json=bookAd, headers=authorization)
-        self.assertEqual(bookAdResponse.status_code, 401)
-        refreshResponse = None
-        self.assertTrue(refreshResponse)
+        testingResponse = testClient.post(
+            '/testing/resource', json=testData, headers=authorization)
+        self.assertEqual(testingResponse.status_code, 401)
