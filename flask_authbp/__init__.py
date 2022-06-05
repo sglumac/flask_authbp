@@ -8,20 +8,19 @@ from flask import request, current_app, Blueprint
 from flask_restx import Resource, Namespace, fields, Api  # type: ignore
 from werkzeug.security import check_password_hash, generate_password_hash
 
-import re
 import jwt
 import datetime
 import hashlib
 
 from .model import Storage
+from .user import *
 
 
-# 4-16 symbols, can contain A-Z, a-z, 0-9, _
-# # (_ can not be at the begin/end and can not go in a row (__))
-USERNAME_REGEXP = r'^(?![_])(?!.*[_]{2})[a-zA-Z0-9._]+(?<![_])$'
-
-# 6-64 symbols, required upper and lower case letters. Can contain !@#$%_  .
-PASSWORD_REGEXP = r'^(?=.*[\d])(?=.*[A-Z])(?=.*[a-z])[\w\d!@#$%_]{6,64}$'
+def return_token_fields():
+    return {
+        'access_token': fields.String(required=True),
+        'refresh_token': fields.String(required=True)
+    }
 
 
 def create_blueprint(storage: Storage):
@@ -33,49 +32,39 @@ def create_blueprint(storage: Storage):
     ns = Namespace('auth', 'Authentication and authorization', path='/')
     api.add_namespace(ns)
 
-    UserApiModel = api.model('User', {
-        'username': fields.String(required=True)
-    })
-
-    RegisterApiModel = api.model('Register', {
-        'username': fields.String(required=True),
-        'password': fields.String(required=True)
-    })
-
-    ReturnTokenApiModel = api.model('ReturnToken', {
-        'access_token': fields.String(required=True),
-        'refresh_token': fields.String(required=True)
-    })
+    UsernameApiModel = api.model('Username', username_fields())
+    UserLoginApiModel = api.model('UserLogin', user_login_fields())
+    ReturnTokenApiModel = api.model('ReturnToken', return_token_fields())
 
     @ns.route('/register')
     class Register(Resource):
-        @ns.expect(RegisterApiModel, validate=True)
-        @ns.marshal_with(UserApiModel)
+        @ns.expect(UserLoginApiModel, validate=True)
+        @ns.marshal_with(UsernameApiModel)
         @ns.response(400, 'username or password incorrect')
         def post(self):
             username = ns.payload['username']
-            if not re.search(USERNAME_REGEXP, username):
-                ns.abort(
-                    400,
+            password = ns.payload['password']
+            if not username_valid(username):
+                ns.abort(400,
                     'Username should have 4-16 symbols, can contain A-Z, a-z, 0-9, _ ' +
                     '(_ can not be at the begin/end and can not go in a row (__))'
                 )
 
-            if not re.search(PASSWORD_REGEXP, ns.payload['password']):
+            if not password_valid(password):
                 ns.abort(
                     400, 'Password should have 6-64 symbols, required upper and lower case letters. Can contain !@#$%_')
 
             if storage.find_password_hash(username):
                 ns.abort(400, 'This username already exists')
 
-            passwordHash = generate_password_hash(ns.payload['password'])
+            passwordHash = generate_password_hash(password)
             storage.store_user(username, passwordHash)
 
             return {'username': username}
 
     @ns.route('/login')
     class Login(Resource):
-        @ns.expect(RegisterApiModel)
+        @ns.expect(UserLoginApiModel)
         @ns.response(200, 'Success', ReturnTokenApiModel)
         @ns.response(401, 'Incorrect username or password')
         def post(self):
