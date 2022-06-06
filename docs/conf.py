@@ -23,12 +23,14 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', os.path.abspath('..')])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', os.path.abspath('..')])
 
 import flask_authbp
 
 
 # -- General configuration ---------------------------------------------
+
+autodoc_mock_imports = ["flask", "flask_restx"]
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
