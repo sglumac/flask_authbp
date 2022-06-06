@@ -2,7 +2,7 @@
 
 __author__ = """Slaven Glumac"""
 __email__ = 'slaven.glumac@gmail.com'
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 from flask import request, current_app, Blueprint
 from flask_restx import Resource, Namespace, fields, Api  # type: ignore
