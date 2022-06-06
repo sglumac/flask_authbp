@@ -56,7 +56,7 @@ author = "Slaven Glumac"
 # the built documents.
 #
 # The short X.Y version.
-flask_authbp_version = '0.1.2'
+flask_authbp_version = '0.1.3'
 version = flask_authbp_version
 # The full version, including alpha/beta/rc tags.
 release = flask_authbp_version
