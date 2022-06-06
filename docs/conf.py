@@ -21,11 +21,10 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-autodoc_mock_imports = ["flask", "flask_restx"]
-
-import flask_authbp
 
 # -- General configuration ---------------------------------------------
+
+autodoc_mock_imports = ["flask", "flask_restx"]
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
@@ -34,6 +33,7 @@ import flask_authbp
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
