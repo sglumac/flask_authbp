@@ -7,4 +7,7 @@ flask_authbp
 ------------
 
 .. automodule:: flask_authbp
+   :imported-members:
    :members:
+   :undoc-members:
+   :show-inheritance:
