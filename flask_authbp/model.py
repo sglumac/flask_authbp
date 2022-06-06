@@ -1,8 +1,7 @@
-from typing import Protocol
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
 
-class Storage(Protocol):
+class Storage(ABC):
     @abstractmethod
     def store_user(self, username, password):
         ...
