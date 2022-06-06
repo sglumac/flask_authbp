@@ -27,6 +27,8 @@ from flask_authbp import __version__
 
 # -- General configuration ---------------------------------------------
 
+autodoc_mock_imports = ["flask", "flask_restx"]
+
 # If your documentation needs a minimal Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'
