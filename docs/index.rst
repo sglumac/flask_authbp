@@ -8,7 +8,7 @@ Welcome to Flask Auth Blueprint's documentation!
    readme
    installation
    usage
-   api
+   modules
    contributing
    authors
    history
