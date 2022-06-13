@@ -1,5 +1,17 @@
-import re
 from flask_restx import fields
+
+import re
+from enum import Enum
+
+
+class ErrorMsg(Enum):
+    InvalidUsername = 'Invalid username'
+    InvalidPassword = 'Invalid password'
+    UserExists = 'Username already exists'
+
+
+def error_msgs():
+    return fields.String(enum=[errorMsg.value for errorMsg in ErrorMsg])
 
 
 def name_valid(username):
