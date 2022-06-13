@@ -7,13 +7,13 @@ from flask import Config, Flask
 import unittest
 import time
 
-from tests.utility import create_testing_app
+from tests.utility import create_jwt_app
 
 
 class TestJwt(unittest.TestCase):
     def test_expired_access_token(self):
         shortAccessExpSecs = 1
-        app = create_testing_app('short_access', accessExpSecs=shortAccessExpSecs)
+        app = create_jwt_app('short_access', accessExpSecs=shortAccessExpSecs)
         self._testClient = app.test_client()
         testClient = app.test_client()
         testUser = {

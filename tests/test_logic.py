@@ -3,15 +3,22 @@
 """Tests for `flask_authbp` package."""
 
 
+from ssl import cert_time_to_seconds
+from parameterized import parameterized, parameterized_class
+
 import unittest
 
-from tests.utility import create_testing_app
+from tests.utility import create_jwt_app
 
 
-class TestLogic(unittest.TestCase):
+@parameterized_class(
+    ('app',), [
+        (create_jwt_app('testing_app'),)
+    ]
+)
+class TestAuth(unittest.TestCase):
     def setUp(self):
-        app = create_testing_app('testing_app')
-        self._testClient = app.test_client()
+        self._testClient = self.app.test_client()
 
     def test_register_invalid_pass(self):
         response = self._testClient.post('/register', json={

@@ -25,7 +25,7 @@ class TestStorage(flask_authbp.Storage):
         self._refreshTokens[userAgentHash] = refreshToken
 
 
-def create_testing_app(title, accessExpSecs=15 * 60):
+def create_jwt_app(title, accessExpSecs=15 * 60):
     class TestingConfig(Config):
         DATABASE_URI = 'sqlite:///:memory:'
         TESTING = True
