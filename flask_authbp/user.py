@@ -2,7 +2,7 @@ import re
 from flask_restx import fields
 
 
-def username_valid(username):
+def name_valid(username):
     '''
     4-16 symbols, can contain A-Z, a-z, 0-9, _ (_ can not be at the begin/end and can not go in a row (__))
     '''
@@ -12,7 +12,7 @@ def username_valid(username):
     )
 
 
-def password_valid(password):
+def pass_valid(password):
     '''
     6-64 symbols, required upper and lower case letters. Can contain !@#$%_  .
     '''
@@ -22,13 +22,13 @@ def password_valid(password):
     )
 
 
-def username_fields():
+def only_name():
     return {
         'username': fields.String(required=True)
     }
 
 
-def user_login_fields():
+def name_and_pass():
     return {
         'username': fields.String(required=True),
         'password': fields.String(required=True)

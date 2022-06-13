@@ -4,6 +4,7 @@ __author__ = """Slaven Glumac"""
 __email__ = 'slaven.glumac@gmail.com'
 __version__ = '0.1.4'
 
+import enum
 from flask import request, current_app, Blueprint
 from flask_restx import Resource, Namespace, fields, Api  # type: ignore
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -13,7 +14,7 @@ import datetime
 import hashlib
 
 from .model import Storage
-from .user import *
+from . import user
 
 
 def return_token_fields():
@@ -32,8 +33,10 @@ def create_blueprint(storage: Storage):
     ns = Namespace('auth', 'Authentication and authorization', path='/')
     api.add_namespace(ns)
 
-    UsernameApiModel = api.model('Username', username_fields())
-    UserLoginApiModel = api.model('UserLogin', user_login_fields())
+    UsernameApiModel = ns.model('Username', user.only_name())
+    UserLoginApiModel = ns.model('UserLogin', user.name_and_pass())
+
+
     ReturnTokenApiModel = api.model('ReturnToken', return_token_fields())
 
     @ns.route('/register')
@@ -44,13 +47,13 @@ def create_blueprint(storage: Storage):
         def post(self):
             username = ns.payload['username']
             password = ns.payload['password']
-            if not username_valid(username):
+            if not user.name_valid(username):
                 ns.abort(400,
                     'Username should have 4-16 symbols, can contain A-Z, a-z, 0-9, _ ' +
                     '(_ can not be at the begin/end and can not go in a row (__))'
                 )
 
-            if not password_valid(password):
+            if not user.pass_valid(password):
                 ns.abort(
                     400, 'Password should have 6-64 symbols, required upper and lower case letters. Can contain !@#$%_')
 
