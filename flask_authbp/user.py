@@ -1,4 +1,4 @@
-from flask_restx import fields
+from flask_restx import fields  # type: ignore
 
 import re
 from enum import Enum

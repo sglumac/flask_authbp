@@ -40,7 +40,7 @@ def create_sb_app(title, accessExpSecs=15 * 60):
         REFRESH_EXP_SECS = 30 * 24 * 60 * 60
 
     storage = TestStorage()
-    blueprint, authorization_required = flask_authbp.create_blueprint(storage)
+    blueprint, permission_required = flask_authbp.sessionbased.create_blueprint(storage)
     app = Flask(title)
     app.config.from_object(TestingConfig)
     app.register_blueprint(blueprint)
@@ -48,7 +48,7 @@ def create_sb_app(title, accessExpSecs=15 * 60):
 
     @api.route('/testing/resource')
     class TestingResource(Resource):
-        @authorization_required
+        @permission_required
         def post(self, user):
             return 200
 

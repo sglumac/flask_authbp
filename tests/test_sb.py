@@ -21,3 +21,6 @@ class TestSessionBased(unittest.TestCase):
         testData = {'data': 'test'}
         testingResponse = self._testClient.post('/testing/resource', json=testData)
         self.assertEqual(testingResponse.status_code, 200)
+
+    def test_prikolica():
+        pass

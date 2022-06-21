@@ -1,9 +1,7 @@
 from typing import Set
 from flask import make_response, request, current_app
-from flask_restx import Resource
-from requests import session
+from flask_restx import Resource  # type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
 
 import secrets
 from datetime import datetime
@@ -11,6 +9,7 @@ from abc import ABC, abstractmethod
 from itertools import count
 
 from . import user
+from ._utility import initialize_blueprint
 
 
 class Storage(ABC):
@@ -29,6 +28,13 @@ class Storage(ABC):
     @abstractmethod
     def find_session(self, sessionId):
         ...
+
+
+def create_blueprint(storage: Storage):
+    bp, ns = initialize_blueprint()
+    add_login_route(ns, storage)
+    add_register_route(ns, storage)
+    return bp, generate_permission_decorator(ns, storage)
 
 
 def generate_session_id(storage: Storage):
