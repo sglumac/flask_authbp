@@ -4,13 +4,13 @@ __author__ = """Slaven Glumac"""
 __email__ = 'slaven.glumac@gmail.com'
 __version__ = '0.1.4'
 
-from flask import request, Blueprint
-from flask_restx import, Namespace, fields, Api  # type: ignore
+from flask import Blueprint
+from flask_restx import Namespace, Api  # type: ignore
 
-from .model import Storage
+from . import sessionbased
 
 
-def create_blueprint(storage: Storage):
+def create_blueprint(storage: sessionbased.Storage):
     '''
     Returns the blueprint and authorization decorator
     '''
@@ -19,4 +19,7 @@ def create_blueprint(storage: Storage):
     ns = Namespace('auth', 'Authentication and authorization', path='/')
     api.add_namespace(ns)
 
-    return blueprint, permission_required
+    sessionbased.add_register_route(ns, storage)
+    sessionbased.add_login_route(ns, storage)
+
+    return blueprint, sessionbased.generate_permission_decorator(ns, storage)

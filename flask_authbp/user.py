@@ -11,7 +11,9 @@ class ErrorMsg(Enum):
 
 
 def error_msgs():
-    return fields.String(enum=[errorMsg.value for errorMsg in ErrorMsg])
+    return {
+        'error': fields.String(enum=[errorMsg.value for errorMsg in ErrorMsg])
+    }
 
 
 def name_valid(username):

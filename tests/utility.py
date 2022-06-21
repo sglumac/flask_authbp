@@ -4,10 +4,10 @@ from flask_restx import Api, Resource
 import flask_authbp
 
 
-class TestStorage(flask_authbp.Storage):
+class TestStorage(flask_authbp.sessionbased.Storage):
     def __init__(self):
         self._passwordHashes = dict()
-        self._refreshTokens = dict()
+        self._session = dict()
 
     def find_password_hash(self, username):
         return self._passwordHashes[username] if username in self._passwordHashes else None
@@ -24,8 +24,14 @@ class TestStorage(flask_authbp.Storage):
     def update_refresh_token(self, userAgentHash, refreshToken):
         self._refreshTokens[userAgentHash] = refreshToken
 
+    def find_session(self, sessionId):
+        return self._session[sessionId] if sessionId in self._session else None
 
-def create_jwt_app(title, accessExpSecs=15 * 60):
+    def store_session(self, sessionId, username):
+        self._session[sessionId] = username
+
+
+def create_sb_app(title, accessExpSecs=15 * 60):
     class TestingConfig(Config):
         DATABASE_URI = 'sqlite:///:memory:'
         TESTING = True
