@@ -5,22 +5,32 @@ from tests.utility import create_sb_app
 
 class TestSessionBased(unittest.TestCase):
     def setUp(self):
-        app = create_sb_app('sb_specific_testing_app')
-        self._testClient = app.test_client()
+        self.app = create_sb_app('sb_specific_testing_app')
 
     def test_accepted_authorization(self):
+        testClient = self.app.test_client()
         testUser = {
             'username': 'TestTokenUser',
             'password': 'TestTokenUser1234!'
         }
-        registerResponse = self._testClient.post('/register', json=testUser)
+        registerResponse = testClient.post('/register', json=testUser)
         self.assertEqual(registerResponse.status_code, 200)
-        loginResponse = self._testClient.post('/login', json=testUser)
+        loginResponse = testClient.post('/login', json=testUser)
         self.assertEqual(loginResponse.status_code, 200)
 
         testData = {'data': 'test'}
-        testingResponse = self._testClient.post('/testing/resource', json=testData)
+        testingResponse = testClient.post('/testing/resource', json=testData)
         self.assertEqual(testingResponse.status_code, 200)
 
-    def test_prikolica():
-        pass
+
+    def test_different_user_agent(self):
+        testClient = self.app.test_client()
+        testUser = {
+            'username': 'TestTokenUserUA',
+            'password': 'TestTokenUserUA1234!'
+        }
+        testClient.post('/register', json=testUser)
+        testClient.post('/login', json=testUser, headers=[("User-Agent", "one")])
+        testData = {'data': 'test'}
+        testingResponse = testClient.post('/testing/resource', json=testData)
+        self.assertEqual(testingResponse.status_code, 200)
