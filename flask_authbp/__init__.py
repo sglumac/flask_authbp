@@ -5,4 +5,4 @@ __email__ = 'slaven.glumac@gmail.com'
 __version__ = '0.1.4'
 
 
-from . import sessionbased
+from . import sessionbased, tokenbased

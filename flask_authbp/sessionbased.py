@@ -4,12 +4,10 @@ from flask_restx import Resource  # type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash
 
 import secrets
-from datetime import datetime
 from abc import ABC, abstractmethod
-from itertools import count
 
-from . import user
-from ._utility import initialize_blueprint
+from flask_authbp import user
+from flask_authbp._utility import initialize_blueprint, add_register_route
 
 
 class Storage(ABC):
@@ -31,6 +29,9 @@ class Storage(ABC):
 
 
 def create_blueprint(storage: Storage):
+    '''
+    Returns the blueprint and authorization decorator for session based authorization
+    '''
     bp, ns = initialize_blueprint()
     add_login_route(ns, storage)
     add_register_route(ns, storage)
@@ -43,31 +44,6 @@ def generate_session_id(storage: Storage):
         if not storage.find_session(sessionId):
             break
     return sessionId
-
-
-def add_register_route(ns, storage: Storage):
-    @ns.route('/register')
-    class Register(Resource):
-        @ns.expect(ns.model('UserLogin', user.name_and_pass()), validate=True)
-        @ns.marshal_with(ns.model('Username', user.only_name()))
-        @ns.response(200, 'Success')
-        @ns.response(400, ns.model('RegistrationError', user.error_msgs()))
-        def post(self):
-            username = ns.payload['username']
-            password = ns.payload['password']
-            if not user.name_valid(username):
-                ns.abort(400, user.ErrorMsg.InvalidUsername.value)
-
-            if not user.pass_valid(password):
-                ns.abort(400, user.ErrorMsg.InvalidPassword.value)
-
-            if storage.find_password_hash(username):
-                ns.abort(400, user.ErrorMsg.UserExists.value)
-
-            passwordHash = generate_password_hash(password)
-            storage.store_user(username, passwordHash)
-
-            return {'username': username}
 
 
 def add_login_route(ns, storage: Storage):
