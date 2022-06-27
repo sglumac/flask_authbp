@@ -12,17 +12,8 @@ class TestStorage(flask_authbp.sessionbased.Storage):
     def find_password_hash(self, username):
         return self._passwordHashes[username] if username in self._passwordHashes else None
 
-    def store_refresh_token(self, username, refreshToken, userAgentHash):
-        self._refreshTokens[userAgentHash] = refreshToken
-
     def store_user(self, username, password):
         self._passwordHashes[username] = password
-
-    def find_refresh_token(self, userAgentHash):
-        return self._refreshTokens[userAgentHash] if userAgentHash in self._refreshTokens else None
-
-    def update_refresh_token(self, userAgentHash, refreshToken):
-        self._refreshTokens[userAgentHash] = refreshToken
 
     def find_session(self, sessionId):
         return self._session[sessionId] if sessionId in self._session else None
@@ -56,3 +47,7 @@ def create_sb_app(title, accessExpSecs=15 * 60):
             return 'Mislav'
 
     return app
+
+
+def create_jwt_app(title, accessExpSecs=15 * 60):
+    pass

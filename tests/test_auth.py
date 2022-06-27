@@ -8,12 +8,13 @@ from parameterized import parameterized_class
 import unittest
 from flask_authbp import user
 
-from tests.utility import create_sb_app
+from tests.utility import create_sb_app, create_jwt_app
 
 
 @parameterized_class(
     ('app',), [
-        (create_sb_app('sb_auth_testing_app'),)
+        (create_sb_app('sb_auth_testing_app'),),
+        (create_jwt_app('jwt_auth_testing_app'),),
     ]
 )
 class TestAuth(unittest.TestCase):
