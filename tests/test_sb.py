@@ -1,4 +1,5 @@
 import unittest
+from werkzeug.http import parse_cookie
 
 from tests.utility import create_sb_app
 
@@ -18,19 +19,6 @@ class TestSessionBased(unittest.TestCase):
         loginResponse = testClient.post('/login', json=testUser)
         self.assertEqual(loginResponse.status_code, 200)
 
-        testData = {'data': 'test'}
-        testingResponse = testClient.post('/testing/resource', json=testData)
-        self.assertEqual(testingResponse.status_code, 200)
-
-
-    def test_different_user_agent(self):
-        testClient = self.app.test_client()
-        testUser = {
-            'username': 'TestTokenUserUA',
-            'password': 'TestTokenUserUA1234!'
-        }
-        testClient.post('/register', json=testUser)
-        testClient.post('/login', json=testUser, headers=[("User-Agent", "one")])
         testData = {'data': 'test'}
         testingResponse = testClient.post('/testing/resource', json=testData)
         self.assertEqual(testingResponse.status_code, 200)
