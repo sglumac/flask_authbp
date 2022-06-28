@@ -1,7 +1,6 @@
-from typing import Set
-from flask import make_response, request, current_app
+from flask import make_response, request, session
 from flask_restx import Resource  # type: ignore
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
 
 import secrets
 from abc import ABC, abstractmethod
@@ -59,11 +58,10 @@ def add_login_route(ns, storage: Storage):
                 ns.abort(401, 'Incorrect username or password')
 
             if check_password_hash(passwordHash, ns.payload['password']):
-                response = make_response()
                 sessionId = generate_session_id(storage)
                 storage.store_session(sessionId, username)
-                response.set_cookie('sessionId', sessionId)
-                return response
+                session['_id'] = sessionId
+                return 'Success'
 
             ns.abort(401, 'Incorrect username or password')
 
@@ -71,9 +69,8 @@ def add_login_route(ns, storage: Storage):
 def generate_permission_decorator(ns, storage: Storage):
     def permission_required(f):
         def wrapper(*args, **kwargs):
-            if 'sessionId' in request.cookies:
-                sessionId = request.cookies.get('sessionId')
-                currentUser = storage.find_session(sessionId)
+            if '_id' in session:
+                currentUser = storage.find_session(session['_id'])
                 return f(*args, **kwargs, user=currentUser)
             else:
                 ns.abort(403, 'Authentication missing')
