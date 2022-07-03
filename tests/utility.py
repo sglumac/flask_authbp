@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from flask import Config, Flask
 from flask_restx import Api, Resource
 
@@ -25,14 +26,18 @@ class SbTestStorage(flask_authbp.sessionbased.Storage):
     def store_session(self, sessionId, username):
         self._session[sessionId] = username
 
+    def remove_session(self, sessionId):
+        self._session.pop(sessionId)
 
-def create_sb_app(title, accessExpSecs=15 * 60):
+
+def create_sb_app(title, urlScheme='https', accessExpSecs=15 * 60):
     class TestingConfig(Config):
         DATABASE_URI = 'sqlite:///:memory:'
         TESTING = True
         SECRET_KEY = 'my secret'
         ACCESS_EXP_SECS = accessExpSecs
         REFRESH_EXP_SECS = 30 * 24 * 60 * 60
+        PREFERRED_URL_SCHEME = urlScheme
 
     storage = SbTestStorage()
     blueprint, permission_required = flask_authbp.sessionbased.create_blueprint(storage)
@@ -45,7 +50,7 @@ def create_sb_app(title, accessExpSecs=15 * 60):
     class TestingResource(Resource):
         @permission_required
         def post(self, user):
-            return 200
+            return HTTPStatus.OK
 
         def get(self):
             return 'Test'
@@ -94,9 +99,9 @@ def create_jwt_app(title, accessExpSecs=15 * 60):
     class TestingResource(Resource):
         @permission_required
         def post(self, user):
-            return 200
+            return HTTPStatus.OK
 
         def get(self):
-            return 'Test'
+            return HTTPStatus.OK
 
     return app
