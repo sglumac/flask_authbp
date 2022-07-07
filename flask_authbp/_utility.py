@@ -1,8 +1,8 @@
 import enum
 from typing import Tuple
-from flask import Blueprint
-from flask_restx import Namespace, Api, Resource
-from werkzeug.security import check_password_hash, generate_password_hash
+from flask import Blueprint  # type: ignore
+from flask_restx import Namespace, Api, Resource  # type: ignore
+from werkzeug.security import generate_password_hash  # type: ignore
 
 from flask_authbp import user
 
@@ -30,13 +30,13 @@ def add_register_route(ns, storage):
             username = ns.payload['username']
             password = ns.payload['password']
             if not user.name_valid(username):
-                ns.abort(400, user.ErrorMsg.InvalidUsername.value)
+                ns.abort(400, user.RegistrationStatus.InvalidUsername.value)
 
             if not user.pass_valid(password):
-                ns.abort(400, user.ErrorMsg.InvalidPassword.value)
+                ns.abort(400, user.RegistrationStatus.InvalidPassword.value)
 
             if storage.find_password_hash(username):
-                ns.abort(400, user.ErrorMsg.UserExists.value)
+                ns.abort(400, user.RegistrationStatus.UserExists.value)
 
             passwordHash = generate_password_hash(password)
             storage.store_user(username, passwordHash)

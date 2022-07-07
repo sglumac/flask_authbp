@@ -1,18 +1,14 @@
 from flask_restx import fields  # type: ignore
 
 import re
-from enum import Enum
 
+from flask_authbp.auth import RegistrationStatus
 
-class ErrorMsg(Enum):
-    InvalidUsername = 'Invalid username'
-    InvalidPassword = 'Invalid password'
-    UserExists = 'Username already exists'
 
 
 def error_msgs():
     return {
-        'error': fields.String(enum=[errorMsg.value for errorMsg in ErrorMsg])
+        'error': fields.String(enum=[errorMsg.value for errorMsg in RegistrationStatus])
     }
 
 

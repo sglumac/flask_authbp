@@ -27,7 +27,7 @@ class TestAuth(unittest.TestCase):
             'password': 'johnny'
         })
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json['message'], user.ErrorMsg.InvalidPassword.value)
+        self.assertEqual(response.json['message'], user.RegistrationStatus.InvalidPassword.value)
 
     def test_register_invalid_user(self):
         response = self._testClient.post('/register', json={
@@ -36,7 +36,7 @@ class TestAuth(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json['message'], user.ErrorMsg.InvalidUsername.value)
+            response.json['message'], user.RegistrationStatus.InvalidUsername.value)
 
     def test_register_success(self):
         response = self._testClient.post('/register', json={
@@ -56,7 +56,7 @@ class TestAuth(unittest.TestCase):
 
         response = self._testClient.post('/register', json=userData)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json['message'], user.ErrorMsg.UserExists.value)
+        self.assertEqual(response.json['message'], user.RegistrationStatus.UserExists.value)
 
     def test_non_existing_user_login(self):
         response = self._testClient.post('/login', json={

@@ -1,6 +1,8 @@
-from flask import make_response, request, session
+from typing import NamedTuple, Optional
+from flask import session  # type: ignore
+from flask_authbp.auth import PermissionChecker
 from flask_restx import Resource  # type: ignore
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash  # type: ignore
 
 import secrets
 from abc import ABC, abstractmethod
@@ -78,3 +80,19 @@ def generate_permission_decorator(ns, storage: Storage):
         wrapper.__name__ = f.__name__
         return wrapper
     return permission_required
+
+from auth import Auth, LoginReport
+
+
+class Session(NamedTuple):
+    id: int
+
+
+def generate_login() -> Callable[[Username, Password], LoginReport[Session]]:
+
+def login(Username, Password) -> LoginReport[Session]:
+    pass
+
+
+def get_auth() -> Auth[Session]:
+    pass

@@ -46,13 +46,6 @@ def create_blueprint(storage: Storage):
     return bp, generate_permission_decorator(ns, storage)
 
 
-def create_blueprint(storage: Storage):
-    bp, ns = initialize_blueprint()
-    add_login_route(ns, storage)
-    add_register_route(ns, storage)
-    return bp, generate_permission_decorator(ns, storage)
-
-
 def add_login_route(ns, storage: Storage):
     @ns.route('/login')
     class Login(Resource):
