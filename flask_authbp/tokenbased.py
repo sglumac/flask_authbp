@@ -8,7 +8,7 @@ import hashlib
 from abc import ABC, abstractmethod
 
 from flask_authbp import user
-from flask_authbp._utility import initialize_blueprint, add_register_route
+from flask_authbp._utility import auth_to_blueprint, add_register_route
 
 
 class Storage(ABC):
@@ -36,11 +36,11 @@ def return_token_fields():
     }
 
 
-def create_blueprint(storage: Storage):
+def auth_to_blueprint(storage: Storage):
     '''
     Returns the blueprint and authorization decorator for token based authentication
     '''
-    bp, ns = initialize_blueprint()
+    bp, ns = auth_to_blueprint()
     add_login_route(ns, storage)
     add_register_route(ns, storage)
     return bp, generate_permission_decorator(ns, storage)

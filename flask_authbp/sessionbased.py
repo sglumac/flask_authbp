@@ -8,7 +8,7 @@ import secrets
 from abc import ABC, abstractmethod
 
 from flask_authbp import user
-from flask_authbp._utility import initialize_blueprint, add_register_route
+from flask_authbp._utility import auth_to_blueprint, add_register_route
 
 
 class Storage(ABC):
@@ -29,22 +29,14 @@ class Storage(ABC):
         ...
 
 
-def create_blueprint(storage: Storage):
+def auth_to_blueprint(storage: Storage):
     '''
     Returns the blueprint and authorization decorator for session based authorization
     '''
-    bp, ns = initialize_blueprint()
+    bp, ns = auth_to_blueprint()
     add_login_route(ns, storage)
     add_register_route(ns, storage)
     return bp, generate_permission_decorator(ns, storage)
-
-
-def generate_session_id(storage: Storage):
-    while True:
-        sessionId = secrets.token_urlsafe()
-        if not storage.find_session(sessionId):
-            break
-    return sessionId
 
 
 def add_login_route(ns, storage: Storage):
@@ -81,18 +73,39 @@ def generate_permission_decorator(ns, storage: Storage):
         return wrapper
     return permission_required
 
-from auth import Auth, LoginReport
+from auth import AuthImplementation, LoginReport, LoginStatus, Password, Username
 
 
 class Session(NamedTuple):
     id: int
 
 
-def generate_login() -> Callable[[Username, Password], LoginReport[Session]]:
+class Login():
+    def __init__(self, storage: Storage):
+        self._storage = storage
 
-def login(Username, Password) -> LoginReport[Session]:
+    def generate_session_id(self):
+        while True:
+            sessionId = secrets.token_urlsafe()
+            if not self._storage.find_session(sessionId):
+                break
+        return sessionId
+
+    def __call__(self, username: Username, password: Password) -> LoginReport[Session]:
+        passwordHash = self._storage.find_password_hash(username)
+        if not passwordHash:
+            return LoginReport(LoginStatus.NonExistingUsername, None)
+
+        if check_password_hash(passwordHash, password):
+            sessionId = self._generate_session_id()
+            self._storage.store_session(sessionId, username)
+            return LoginReport(LoginStatus.Success, Session(sessionId))
+        else:
+            return LoginReport(LoginStatus.WrongPassword, None)
+
+
+class PermissionChecker():
     pass
 
-
-def get_auth() -> Auth[Session]:
-    pass
+def auth_implementation() -> AuthImplementation:
+    return AuthImplementation()

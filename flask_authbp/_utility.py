@@ -5,9 +5,10 @@ from flask_restx import Namespace, Api, Resource  # type: ignore
 from werkzeug.security import generate_password_hash  # type: ignore
 
 from flask_authbp import user
+from flask_authbp.auth import AuthImplementation, Username
 
 
-def initialize_blueprint() -> Tuple[Blueprint, Namespace]:
+def auth_to_blueprint(auth) -> Tuple[Blueprint, Namespace]:
     '''
     Returns the blueprint and authorization decorator
     '''
@@ -16,10 +17,12 @@ def initialize_blueprint() -> Tuple[Blueprint, Namespace]:
     ns = Namespace('auth', 'Authentication and authorization', path='/')
     api.add_namespace(ns)
 
+    add_register_route(ns, auth.register)
+
     return bp, ns
 
 
-def add_register_route(ns, storage):
+def add_register_route(ns, register):
     @ns.route('/register')
     class Register(Resource):
         @ns.expect(ns.model('UserLogin', user.name_and_pass()), validate=True)
@@ -35,8 +38,7 @@ def add_register_route(ns, storage):
             if not user.pass_valid(password):
                 ns.abort(400, user.RegistrationStatus.InvalidPassword.value)
 
-            if storage.find_password_hash(username):
-                ns.abort(400, user.RegistrationStatus.UserExists.value)
+            register(username, password)
 
             passwordHash = generate_password_hash(password)
             storage.store_user(username, passwordHash)
