@@ -36,7 +36,7 @@ def return_token_fields():
     }
 
 
-def auth_to_blueprint(storage: Storage):
+def create__blueprint(storage: Storage):
     '''
     Returns the blueprint and authorization decorator for token based authentication
     '''

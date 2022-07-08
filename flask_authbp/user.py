@@ -2,8 +2,7 @@ from flask_restx import fields  # type: ignore
 
 import re
 
-from flask_authbp.auth import RegistrationStatus
-
+from flask_authbp._utility import RegistrationStatus
 
 
 def error_msgs():
