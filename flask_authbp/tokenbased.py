@@ -8,7 +8,8 @@ import hashlib
 from abc import ABC, abstractmethod
 
 from flask_authbp import user
-from flask_authbp._utility import auth_to_blueprint, add_register_route
+from flask_authbp._utility import authentication_blueprint, PermissionDecorator
+from flask_authbp.types import Authentication
 
 
 class Storage(ABC):
@@ -40,12 +41,17 @@ def create__blueprint(storage: Storage):
     '''
     Returns the blueprint and authorization decorator for token based authentication
     '''
-    bp, ns = auth_to_blueprint()
-    add_login_route(ns, storage)
-    add_register_route(ns, storage)
-    return bp, generate_permission_decorator(ns, storage)
+    return authentication_blueprint(
+        Authentication(storage.find_password_hash, storage.store_user, _SessionGenerator(storage))
+    ), PermissionDecorator(_UserGetter(storage))
 
 
+class _SessionGenerator:
+    def __init__(self) -> None:
+        pass
+
+    def __call__(self, username):
+        pass
 def add_login_route(ns, storage: Storage):
     @ns.route('/login')
     class Login(Resource):

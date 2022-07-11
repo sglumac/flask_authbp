@@ -1,5 +1,4 @@
 import unittest
-from werkzeug.http import parse_cookie
 
 from tests.utility import create_sb_app
 
