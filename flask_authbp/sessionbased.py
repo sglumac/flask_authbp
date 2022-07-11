@@ -1,7 +1,10 @@
-from flask import session  # type: ignore
+from http import HTTPStatus
+from flask import abort, redirect, request, session  # type: ignore
 
 import secrets
 from abc import ABC, abstractmethod
+
+from flask_restx import Resource
 
 from ._utility import authentication_blueprint, PermissionDecorator
 from .types import Authentication
@@ -33,9 +36,11 @@ def create_blueprint(storage: Storage):
     '''
     Returns the blueprint and authorization decorator for session based authorization
     '''
-    return authentication_blueprint(
+    bp, ns = authentication_blueprint(
         Authentication(storage.find_password_hash, storage.store_user, _SessionGenerator(storage))
-    ), PermissionDecorator(_UserGetter(storage))
+    )
+    add_logout_route(ns, storage)
+    return bp, PermissionDecorator(_UserGetter(storage))
 
 
 class _SessionGenerator:
@@ -60,4 +65,24 @@ class _UserGetter:
         self._storage = storage
 
     def __call__(self):
+        if '_id' not in session:
+            abort(HTTPStatus.FORBIDDEN, 'Login missing')
         return self._storage.find_session(session['_id'])
+
+
+def add_logout_route(ns, storage: Storage):
+    @ns.route('/logout')
+    class Logout(Resource):
+        @ns.response(HTTPStatus.OK, 'Success')
+        @ns.response(HTTPStatus.FORBIDDEN, 'Authorization missing')
+        @ns.response(HTTPStatus.MOVED_PERMANENTLY, 'Insecure connection')
+        def post(self):
+            if not request.is_secure:
+                url = request.url.replace('http://', 'https://', 1)
+                return redirect(url, code=HTTPStatus.MOVED_PERMANENTLY)
+            if '_id' in session:
+                storage.remove_session(session['_id'])
+                session.pop('_id')
+                return HTTPStatus.OK
+            else:
+                ns.abort(HTTPStatus.FORBIDDEN, 'Authentication missing')

@@ -31,7 +31,7 @@ def authentication_blueprint(authentication: Authentication) -> Blueprint:
     api.add_namespace(ns)
     add_register_route(ns, authentication.find_password_hash, authentication.store_user)
     add_login_route(ns, authentication.find_password_hash, authentication.generate_session_info)
-    return bp
+    return bp, ns
 
 
 def add_register_route(ns, user_exists, store_user):

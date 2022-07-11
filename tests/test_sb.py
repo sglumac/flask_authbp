@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import unittest
 
 from tests.utility import create_sb_app
