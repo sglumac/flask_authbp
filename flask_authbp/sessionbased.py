@@ -24,6 +24,10 @@ class Storage(ABC):
     def find_session(self, sessionId):
         ...
 
+    @abstractmethod
+    def remove_session(self, sessionId):
+        ...
+
 
 def create_blueprint(storage: Storage):
     '''
