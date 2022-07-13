@@ -80,13 +80,14 @@ class TokenTestStorage(flask_authbp.tokenbased.Storage):
         self._refreshTokens[userAgentHash] = (username, refreshTokenEncoded)
 
 
-def create_jwt_app(title, accessExpSecs=15 * 60):
+def create_jwt_app(title, urlScheme='https', accessExpSecs=15 * 60):
     class TestingConfig(Config):
         DATABASE_URI = 'sqlite:///:memory:'
         TESTING = True
         SECRET_KEY = 'my secret'
         ACCESS_EXP_SECS = accessExpSecs
         REFRESH_EXP_SECS = 30 * 24 * 60 * 60
+        PREFERRED_URL_SCHEME = urlScheme
 
     storage = TokenTestStorage()
     blueprint, permission_required = flask_authbp.tokenbased.create_blueprint(storage)

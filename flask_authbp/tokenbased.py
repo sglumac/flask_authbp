@@ -8,7 +8,6 @@ import jwt
 import datetime
 from abc import ABC, abstractmethod
 
-from flask_authbp import user
 from flask_authbp._utility import authentication_blueprint, PermissionDecorator
 from flask_authbp.types import Authentication
 

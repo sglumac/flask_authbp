@@ -6,7 +6,7 @@
 from parameterized import parameterized_class  # type: ignore
 
 import unittest
-from flask_authbp import user
+from flask_authbp.messages import LoginStatus, RegistrationStatus
 
 from tests.utility import create_sb_app, create_jwt_app
 
@@ -27,7 +27,7 @@ class TestAuth(unittest.TestCase):
             'password': 'johnny'
         })
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json['message'], user.RegistrationStatus.InvalidPassword.value)
+        self.assertEqual(response.json['message'], RegistrationStatus.InvalidPassword)
 
     def test_register_invalid_user(self):
         response = self._testClient.post('/register', json={
@@ -36,7 +36,7 @@ class TestAuth(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json['message'], user.RegistrationStatus.InvalidUsername.value)
+            response.json['message'], RegistrationStatus.InvalidUsername)
 
     def test_register_success(self):
         response = self._testClient.post('/register', json={
@@ -44,7 +44,6 @@ class TestAuth(unittest.TestCase):
             'password': 'Johny1234!'
         })
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json['username'], 'Johny')
 
     def test_register_same_user(self):
         userData = {
@@ -56,7 +55,7 @@ class TestAuth(unittest.TestCase):
 
         response = self._testClient.post('/register', json=userData)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json['message'], user.RegistrationStatus.UserExists.value)
+        self.assertEqual(response.json['message'], RegistrationStatus.UserExists)
 
     def test_non_existing_user_login(self):
         response = self._testClient.post('/login', json={
@@ -64,8 +63,8 @@ class TestAuth(unittest.TestCase):
             'password': 'Login1234!'
         })
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json['message'],
-                         'Incorrect username or password')
+        self.assertEqual(response.json['message'], LoginStatus.NonExistingUsername)
+
 
     def test_wrong_pass_login(self):
         response = self._testClient.post('/register', json={
@@ -78,8 +77,7 @@ class TestAuth(unittest.TestCase):
             'password': 'WrongPass1234!'
         })
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json['message'],
-                         'Incorrect username or password')
+        self.assertEqual(response.json['message'], LoginStatus.WrongPassword)
 
     def test_login_success(self):
         testUser = {

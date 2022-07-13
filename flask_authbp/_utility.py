@@ -3,25 +3,44 @@ from flask import Blueprint, abort, redirect, request  # type: ignore
 from flask_restx import Namespace, Api, Resource, fields  # type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash  # type: ignore
 
-from flask_authbp import user
+from typing import Tuple
+import re
 
-from enum import Enum
-from typing import Callable, Tuple
-
+from flask_authbp.messages import LoginStatus, RegistrationStatus
 from flask_authbp.types import Authentication
 
 
-class RegistrationStatus(Enum):
-    InvalidUsername = 'Invalid username'
-    InvalidPassword = 'Invalid password'
-    UserExists = 'Username already exists'
-    Succcess = 'Success'
+def name_valid(username):
+    '''
+    4-16 symbols, can contain A-Z, a-z, 0-9, _ (_ can not be at the begin/end and can not go in a row (__))
+    '''
+    return re.search(
+        r'^(?![_])(?!.*[_]{2})[a-zA-Z0-9._]+(?<![_])$',
+        username
+    )
 
 
-class LoginStatus(Enum):
-    NonExistingUsername = 'Username does not exist'
-    WrongPassword = 'Invalid password'
-    Success = 'Success'
+def pass_valid(password):
+    '''
+    6-64 symbols, required upper and lower case letters. Can contain !@#$%_  .
+    '''
+    return re.search(
+        r'^(?=.*[\d])(?=.*[A-Z])(?=.*[a-z])[\w\d!@#$%_]{6,64}$',
+        password
+    )
+
+
+def only_name():
+    return {
+        'username': fields.String(required=True)
+    }
+
+
+def name_and_pass():
+    return {
+        'username': fields.String(required=True),
+        'password': fields.String(required=True)
+    }
 
 
 def authentication_blueprint(authentication: Authentication) -> Tuple[Blueprint, Namespace]:
@@ -37,16 +56,15 @@ def authentication_blueprint(authentication: Authentication) -> Tuple[Blueprint,
 def add_register_route(ns, user_exists, store_user):
     @ns.route('/register')
     class Register(Resource):
-        @ns.expect(ns.model('UserLogin', user.name_and_pass()), validate=True)
+        @ns.expect(ns.model('UserLogin', name_and_pass()), validate=True)
         @ns.response(HTTPStatus.OK, 'Success')
-        @ns.response(HTTPStatus.BAD_REQUEST, ns.model('RegistrationError', error_msgs()))
         def post(self):
             username = ns.payload['username']
             password = ns.payload['password']
-            if not user.name_valid(username):
+            if not name_valid(username):
                 ns.abort(HTTPStatus.BAD_REQUEST, RegistrationStatus.InvalidUsername)
 
-            if not user.pass_valid(password):
+            if not pass_valid(password):
                 ns.abort(HTTPStatus.BAD_REQUEST, RegistrationStatus.InvalidPassword)
 
             if user_exists(username):
@@ -54,21 +72,19 @@ def add_register_route(ns, user_exists, store_user):
 
             store_user(username, generate_password_hash(password))
 
-            return HTTPStatus.OK
-
 
 def add_login_route(ns, find_password_hash, generate_session_info):
     @ns.route('/login')
     class Login(Resource):
-        @ns.expect(ns.model('UserLogin', user.name_and_pass()))
+        @ns.expect(ns.model('UserLogin', name_and_pass()))
         @ns.response(200, 'Success')
-        @ns.response(401, 'Incorrect username or password')
+        @ns.response(401, LoginStatus.NonExistingUsername)
         def post(self):
             username = ns.payload['username']
             passwordHash = find_password_hash(username)
 
             if not passwordHash:
-                ns.abort(HTTPStatus.UNAUTHORIZED, 'Wrong username')
+                ns.abort(HTTPStatus.UNAUTHORIZED, LoginStatus.NonExistingUsername)
 
             if check_password_hash(passwordHash, ns.payload['password']):
                 response = generate_session_info(username)
@@ -77,7 +93,7 @@ def add_login_route(ns, find_password_hash, generate_session_info):
                 else:
                     return HTTPStatus.OK
             else:
-                ns.abort(HTTPStatus.UNAUTHORIZED, 'Wrong password')
+                ns.abort(HTTPStatus.UNAUTHORIZED, LoginStatus.WrongPassword)
 
 
 class PermissionDecorator:
@@ -96,9 +112,3 @@ class PermissionDecorator:
         wrapper.__doc__ = f.__doc__
         wrapper.__name__ = f.__name__
         return wrapper
-
-
-def error_msgs():
-    return {
-        'error': fields.String(enum=[errorMsg.value for errorMsg in RegistrationStatus])
-    }
