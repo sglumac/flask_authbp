@@ -1,6 +1,6 @@
 from http import HTTPStatus
-from flask import Config, Flask
-from flask_restx import Api, Resource
+from flask import Config, Flask  # type: ignore
+from flask_restx import Api, Resource  # type: ignore
 
 import flask_authbp
 

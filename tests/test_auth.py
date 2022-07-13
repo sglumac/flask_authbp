@@ -3,7 +3,7 @@
 """Tests for `flask_authbp` package."""
 
 
-from parameterized import parameterized_class
+from parameterized import parameterized_class  # type: ignore
 
 import unittest
 from flask_authbp import user

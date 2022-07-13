@@ -1,10 +1,10 @@
 from http import HTTPStatus
-from flask import abort, redirect, request, session  # type: ignore
+from typing import Callable, Tuple
+from flask import Blueprint, abort, redirect, request, session  # type: ignore
+from flask_restx import Resource  # type: ignore
 
 import secrets
 from abc import ABC, abstractmethod
-
-from flask_restx import Resource
 
 from ._utility import authentication_blueprint, PermissionDecorator
 from .types import Authentication
@@ -32,7 +32,7 @@ class Storage(ABC):
         ...
 
 
-def create_blueprint(storage: Storage):
+def create_blueprint(storage: Storage) -> Tuple[Blueprint, Callable]:
     '''
     Returns the blueprint and authorization decorator for session based authorization
     '''

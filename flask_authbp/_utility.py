@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash  # typ
 from flask_authbp import user
 
 from enum import Enum
-from typing import Callable
+from typing import Callable, Tuple
 
 from flask_authbp.types import Authentication
 
@@ -24,7 +24,7 @@ class LoginStatus(Enum):
     Success = 'Success'
 
 
-def authentication_blueprint(authentication: Authentication) -> Blueprint:
+def authentication_blueprint(authentication: Authentication) -> Tuple[Blueprint, Namespace]:
     bp = Blueprint('auth', __name__, url_prefix='/')
     api = Api(bp)
     ns = Namespace('auth', 'Authentication', path='/')
@@ -71,7 +71,11 @@ def add_login_route(ns, find_password_hash, generate_session_info):
                 ns.abort(HTTPStatus.UNAUTHORIZED, 'Wrong username')
 
             if check_password_hash(passwordHash, ns.payload['password']):
-                generate_session_info(username)
+                response = generate_session_info(username)
+                if response:
+                    return response
+                else:
+                    return HTTPStatus.OK
             else:
                 ns.abort(HTTPStatus.UNAUTHORIZED, 'Wrong password')
 
