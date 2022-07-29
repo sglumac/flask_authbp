@@ -12,3 +12,5 @@ flask-restx==0.5.1
 PyJWT==2.3.0
 mypy==0.960
 parameterized==0.8.1
+Flask-Login==0.6.1
+Flask-SQLAlchemy==2.5.1

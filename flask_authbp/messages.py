@@ -29,12 +29,8 @@ class _RegistrationStatus:
 
 class _LoginStatus:
     @constant
-    def NonExistingUsername(self):
-        return 'Username does not exist'
-    
-    @constant
-    def WrongPassword(self):
-        return 'Invalid password'
+    def WrongUsernameOrPassword(self):
+        return 'Invalid username or password'
 
     @constant
     def Success(self):

@@ -8,13 +8,14 @@ from parameterized import parameterized_class  # type: ignore
 import unittest
 from flask_authbp.messages import LoginStatus, RegistrationStatus
 
-from tests.utility import create_sb_app, create_jwt_app
+from tests.utility import create_flask_login_app, create_sb_app, create_jwt_app
 
 
 @parameterized_class(
     ('app',), [
         (create_sb_app('sb_auth_testing_app'),),
         (create_jwt_app('jwt_auth_testing_app'),),
+        (create_flask_login_app('flask_login_auth_testing_app'),),
     ]
 )
 class TestAuth(unittest.TestCase):
@@ -63,7 +64,7 @@ class TestAuth(unittest.TestCase):
             'password': 'Login1234!'
         })
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json['message'], LoginStatus.NonExistingUsername)
+        self.assertEqual(response.json['message'], LoginStatus.WrongUsernameOrPassword)
 
 
     def test_wrong_pass_login(self):
@@ -77,7 +78,7 @@ class TestAuth(unittest.TestCase):
             'password': 'WrongPass1234!'
         })
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json['message'], LoginStatus.WrongPassword)
+        self.assertEqual(response.json['message'], LoginStatus.WrongUsernameOrPassword)
 
     def test_login_success(self):
         testUser = {

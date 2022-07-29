@@ -10,4 +10,4 @@ from typing import Callable
 
 from flask import abort
 
-from . import sessionbased, tokenbased
+from . import flask_login, sessionbased, tokenbased, example

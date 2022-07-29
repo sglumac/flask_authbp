@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from flask import Config, Flask  # type: ignore
+from flask import Config, Flask
 from flask_restx import Api, Resource  # type: ignore
 
 import flask_authbp
@@ -106,3 +106,7 @@ def create_jwt_app(title, urlScheme='https', accessExpSecs=15 * 60):
             return HTTPStatus.OK
 
     return app
+
+
+def create_flask_login_app(title, urlScheme='https'):
+    return flask_authbp.example.flask_login.app

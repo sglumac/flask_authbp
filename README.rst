@@ -33,6 +33,8 @@ Features
 Credits
 -------
 
+The code uses Flask-Login_ (MIT).
+
 The code was initially based on flask-restplus-full-todo-example-with-jwt_.
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
@@ -40,3 +42,4 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _flask-restplus-full-todo-example-with-jwt: https://github.com/blohinn/flask-restplus-full-todo-example-with-jwt
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+.. _Flask-Login: https://github.com/maxcountryman/flask-login

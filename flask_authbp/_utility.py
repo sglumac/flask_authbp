@@ -78,13 +78,13 @@ def add_login_route(ns, find_password_hash, generate_session_info):
     class Login(Resource):
         @ns.expect(ns.model('UserLogin', name_and_pass()))
         @ns.response(200, 'Success')
-        @ns.response(401, LoginStatus.NonExistingUsername)
+        @ns.response(401, LoginStatus.WrongUsernameOrPassword)
         def post(self):
             username = ns.payload['username']
             passwordHash = find_password_hash(username)
 
             if not passwordHash:
-                ns.abort(HTTPStatus.UNAUTHORIZED, LoginStatus.NonExistingUsername)
+                ns.abort(HTTPStatus.UNAUTHORIZED, LoginStatus.WrongUsernameOrPassword)
 
             if check_password_hash(passwordHash, ns.payload['password']):
                 response = generate_session_info(username)
@@ -93,7 +93,7 @@ def add_login_route(ns, find_password_hash, generate_session_info):
                 else:
                     return HTTPStatus.OK
             else:
-                ns.abort(HTTPStatus.UNAUTHORIZED, LoginStatus.WrongPassword)
+                ns.abort(HTTPStatus.UNAUTHORIZED, LoginStatus.WrongUsernameOrPassword)
 
 
 class PermissionDecorator:
